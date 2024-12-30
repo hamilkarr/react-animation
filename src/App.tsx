@@ -1,56 +1,64 @@
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useState } from 'react';
 
 const variants = {
-    start: {
+    entry: (direction: number) => ({
+        x: direction * 500,
         opacity: 0,
-        scale: 0.5
-    },
-    end: {
+        scale: 0
+    }),
+    center: {
+        x: 0,
         opacity: 1,
         scale: 1,
         transition: {
-            type: 'spring',
-            delay: 0.5,
-            delayChildren: 0.6,
-            staggerChildren: 0.2,
-            duration: 0.5
+            duration: 1
         }
-    }
-}
-
-const circleVariants = {
-    start: {
-        opacity: 0,
-        y: 20
     },
-    end: {
-        opacity: 1,
-        y: 0
-    }
+    exit: (direction: number) => ({
+        x: direction * -500,
+        opacity: 0,
+        scale: 0,
+        transition: {
+            duration: 1
+        }
+    })
 }
 
-const Circle = () => {
+const Box = ({ children, custom }: { children: React.ReactNode; custom: number }) => {
     return (
-        <motion.div className='w-16 h-16 bg-white rounded-full place-self-center' variants={circleVariants}>
+        <motion.div 
+            className='w-40 h-40 bg-white rounded-3xl font-black flex items-center justify-center text-4xl absolute top-40'
+            custom={custom}
+            variants={variants}
+            initial='entry'
+            animate='center'
+            exit='exit'
+        >
+            {children}
         </motion.div>
     )
 }
 
 const App = () => {
+    const [visible, setVisible] = useState(1);
+    const [direction, setDirection] = useState(1);
+    const nextPlease = () => {
+        setVisible(prev => prev === 10 ? 10 : prev + 1);
+        setDirection(1);
+    }
+    const prevPlease = () => {
+        setVisible(prev => prev === 1 ? 1 : prev - 1);
+        setDirection(-1);
+    }
     return (
-        <div className='bg-gradient-to-tr from-[#ee0099] to-[#dd00ee] flex items-center justify-center h-screen w-screen'>
-            <motion.div
-                className='w-48 h-48  bg-white/20  rounded-3xl shadow-lg grid grid-cols-2'
-                variants={variants}
-                initial='start'
-                animate='end'
-            >
-                <Circle/>
-                <Circle/>
-                <Circle/>
-                <Circle/>
-            </motion.div>
-        </div>
+        <motion.div className='flex flex-col gap-5 items-center justify-center h-screen w-screen bg-gradient-to-tr from-[#0f92e3] to-[#b9dc1e] relative' >
+            <AnimatePresence custom={direction} mode='wait'>
+                <Box key={visible} custom={direction}>{visible}</Box>
+            </AnimatePresence>
+            <button onClick={nextPlease}>Next</button>
+            <button onClick={prevPlease}>Prev</button>
+        </motion.div>
     )
 };
 export default App;
