@@ -25,39 +25,51 @@ const variants = {
     })
 }
 
-const Box = ({ children, custom }: { children: React.ReactNode; custom: number }) => {
+const Box = ({ span, layoutId, onClick }: { 
+    span?: boolean, 
+    layoutId?: string,
+    onClick?: () => void 
+}) => {
     return (
-        <motion.div 
-            className='w-40 h-40 bg-white rounded-3xl font-black flex items-center justify-center text-4xl absolute top-40'
-            custom={custom}
-            variants={variants}
-            initial='entry'
-            animate='center'
-            exit='exit'
+        <motion.div
+            onClick={onClick}
+            className={`h-40 bg-white rounded-3xl font-black flex items-center justify-center text-4xl shadow-lg ${
+                span ? 'col-span-2' : ''
+            }`}
+            // variants={variants}
+            // initial='entry'
+            // animate='center'
+            // exit='exit'
+            layoutId={layoutId}
         >
-            {children}
         </motion.div>
     )
 }
 
 const App = () => {
-    const [visible, setVisible] = useState(1);
-    const [direction, setDirection] = useState(1);
-    const nextPlease = () => {
-        setVisible(prev => prev === 10 ? 10 : prev + 1);
-        setDirection(1);
-    }
-    const prevPlease = () => {
-        setVisible(prev => prev === 1 ? 1 : prev - 1);
-        setDirection(-1);
-    }
+    const [id, setId] = useState<null | string>(null);
+    console.log(id);
     return (
-        <motion.div className='flex flex-col gap-5 items-center justify-center h-screen w-screen bg-gradient-to-tr from-[#0f92e3] to-[#b9dc1e] relative' >
-            <AnimatePresence custom={direction} mode='wait'>
-                <Box key={visible} custom={direction}>{visible}</Box>
+        <motion.div className='flex items-center justify-center h-screen w-screen bg-gradient-to-tr from-[#0f92e3] to-[#b9dc1e]'>
+            <div className='w-3/5 grid grid-cols-3 gap-5'>
+                {["1", "2", "3", "4"].map(
+                    (n) => <Box layoutId={n} key={n} onClick={() => setId(n)} span={n === '4' || n === '1'}/>
+                )}
+            </div>
+            <AnimatePresence>
+                {id && (
+                    <motion.div 
+                        className='w-full h-full flex items-center justify-center absolute top-0 left-0'
+                        onClick={() => setId(null)}
+                        initial={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
+                        animate={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+                        exit={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
+                    >
+                        <motion.div className='w-80 h-40 bg-white rounded-3xl font-black flex items-center justify-center text-4xl shadow-lg' layoutId={id}>
+                        </motion.div>
+                    </motion.div>
+                )}
             </AnimatePresence>
-            <button onClick={nextPlease}>Next</button>
-            <button onClick={prevPlease}>Prev</button>
         </motion.div>
     )
 };
